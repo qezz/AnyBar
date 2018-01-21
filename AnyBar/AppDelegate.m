@@ -16,6 +16,7 @@
 @property (strong, nonatomic) NSString *imageName;
 @property (assign, nonatomic) BOOL dark;
 @property (assign, nonatomic) int udpPort;
+@property (strong, nonatomic) NSString *note;
 
 @end
 
@@ -24,6 +25,7 @@
 -(void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     _udpPort = -1;
     _imageName = @"white";
+    _note = @"Note: ";
     self.statusItem = [self initializeStatusBarItem];
     [self refreshDarkMode];
 
@@ -38,10 +40,12 @@
     @finally {
         NSString *portTitle = [NSString stringWithFormat:@"UDP port: %@",
                                _udpPort >= 0 ? [NSNumber numberWithInt:_udpPort] : @"unavailable"];
+        NSString *note = [NSString stringWithFormat:@"%@", _note];
         NSString *quitTitle = @"Quit";
         _statusItem.menu = [self initializeStatusBarMenu:@{
                                                            portTitle: [NSValue valueWithPointer:nil],
-                                                           quitTitle: [NSValue valueWithPointer:@selector(terminate:)]
+                                                           quitTitle: [NSValue valueWithPointer:@selector(terminate:)],
+                                                           note:      [NSValue valueWithPointer:@selector(doNothing)],
                                                            }];
     }
 
@@ -71,6 +75,10 @@
     }
 
     return port;
+}
+
+-(NSString*) getNote {
+    return _note;
 }
 
 - (void)refreshDarkMode {
@@ -160,14 +168,49 @@
     _imageName = name;
 }
 
+-(void)setNote:(NSString*) note {
+    // _note = note;
+    NSLog(@"Setting note to '%@'", note);
+    NSLog(@"Current menu item title: '%@'", _note);
+
+    NSString* newTitle = [NSString stringWithFormat:@"Note: %@", note];
+    [[_statusItem.menu itemWithTitle:_note] setTitle: newTitle];
+    _note = newTitle;
+}
+
 -(void)processUdpSocketMsg:(GCDAsyncUdpSocket *)sock withData:(NSData *)data
     fromAddress:(NSData *)address {
     NSString *msg = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 
     if ([msg isEqualToString:@"quit"])
+    {
         [[NSApplication sharedApplication] terminate:nil];
+    }
     else
-        [self setImage:msg];
+    {
+        // check if first char is ":", so it is smth like ":some note"
+        NSString *firstLetter = [msg substringToIndex:1];
+        if ([firstLetter isEqualToString:@":"]) {
+            // update the note only
+            [self setNote:[msg substringFromIndex:1]];
+        } else {
+            NSArray* items = [msg componentsSeparatedByString:@":"];
+            NSUInteger numOfItems = [items count];
+            if (numOfItems == 2)
+            {
+                // update both
+                NSString* color = items[0];
+                NSString* note = items[1];
+                [self setImage:color];
+                [self setNote:note];
+            } else if (numOfItems == 1) {
+                // update only color
+                NSString* color = items[0];
+                [self setImage:color];
+            }
+        }
+
+    }
 }
 
 -(NSStatusItem*) initializeStatusBarItem {
@@ -227,6 +270,11 @@
     _imageName = (NSString *)imgName;
 
     [self setImage:_imageName];
+}
+
+
+-(void) doNothing {
+    return;
 }
 
 @end

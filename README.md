@@ -1,18 +1,25 @@
-# AnyBar: OS X menubar status indicator
+# AnyBar: OS X menubar status indicator (with notes)
 
-AnyBar is a small indicator for your menubar that does one simple thing: it displays a colored dot. What the dot means and when to change it is up to you.
+AnyBar is a small indicator for your menubar that does one simple
+thing: it displays a colored dot. What the dot means and when to
+change it is up to you.
 
 <img src="screenshot.png?raw=true" />
 
-## Download
+use bash alias and send `color:"custom note"` to set the color and note
 
-Version 0.1.4:
+* `anybar :"buy big thing"` to update just a note
+* `anybar red:"buy big thing"` to update color and note
+* `anybar white:` or `anybar green` to update color only
+* `anybar green:note 1739` to update AnyBar on specific port
 
-<a href="https://github.com/tonsky/AnyBar/releases/download/0.1.4/AnyBar-0.1.4.zip"><img src="AnyBar/Images.xcassets/AppIcon.appiconset/icon_128x128@2x.png?raw=true" style="width: 128px;" width=128/></a>
+Updated by Sergey Mishin <sergei.a.mishin@gmail.com>, 21 Jan 2018
 
-Or using [Homebrew-cask](http://caskroom.io):
+## Build
 
-    brew cask install anybar
+1. Clone this repo
+2. Build the project with Xcode
+3. Find `AnyBar.app` and move it to `/Applications`
 
 ## Usage
 
@@ -27,6 +34,17 @@ Once launched, you may send it a message to change the style of the dot:
 ```sh
 echo -n "black" | nc -4u -w0 localhost 1738
 ```
+
+## Running multiple instances
+
+You can run several instances of AnyBar as long as they listen on different ports. Use the `ANYBAR_PORT` environment variable to change the port and `open -na` to run several instances:
+
+```sh
+ANYBAR_PORT=1738 open -na AnyBar
+ANYBAR_PORT=1739 open -na AnyBar
+ANYBAR_PORT=1740 open -na AnyBar
+```
+
 
 The following default commands change the style of the dot:
 
@@ -137,15 +155,6 @@ Alfred:
 - Command monitoring [rvirani1/with_anybar](https://github.com/rvirani1/with_anybar)
 - Extension for ipython/jupyter/ipython notebook [ermakovpetr/ipython-anybar](https://github.com/ermakovpetr/ipython-anybar)
 
-## Running multiple instances
-
-You can run several instances of AnyBar as long as they listen on different ports. Use the `ANYBAR_PORT` environment variable to change the port and `open -na` to run several instances:
-
-```sh
-ANYBAR_PORT=1738 open -na AnyBar
-ANYBAR_PORT=1739 open -na AnyBar
-ANYBAR_PORT=1740 open -na AnyBar
-```
 
 ## Custom images
 
